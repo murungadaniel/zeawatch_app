@@ -313,29 +313,47 @@ if 'scan_history' not in st.session_state:
 # Authenticate with Hugging Face using API Key (safer via environment variable)
 # HF_TOKEN = os.getenv("HF_TOKEN")   # Set this in GitHub Actions or local .env
 
-MF_TOKEN = st.secrets.get("zenmatch", {}).get("token")
-HF_TOKEN = zeawatch_secrets.get("token")
+# Authenticate with Hugging Face using secrets
+try:
+    # Get tokens from secrets or environment variables
+    HF_TOKEN = st.secrets.get("huggingface", {}).get("token") or os.environ.get("HF_TOKEN")
+    MF_TOKEN = st.secrets.get("zenmatch", {}).get("token") or os.environ.get("ZENMATCH_TOKEN")
+    
+    if not HF_TOKEN:
+        st.error("Missing Hugging Face API token in secrets!")
+        st.stop()
+        
+    if not MF_TOKEN:
+        st.error("Missing Zenmatch API token in secrets!")
+        st.stop()
 
+except Exception as e:
+    st.error(f"Error loading secrets: {e}")
+    st.stop()
 
-login(token=HF_TOKEN)
-
+@st.cache_resource
 def load_cnn_model():
     try:
         # Download the model from Hugging Face Hub
         model_path = hf_hub_download(
-            repo_id="simuyu/zeawatch_model",  # Replace with your Hugging Face repo
-            filename="disease_classifier.h5",        # Your model filename
+            repo_id="simuyu/zeawatch_model",
+            filename="disease_classifier.h5",
             token=HF_TOKEN
         )
-
-        # Load the model
+        
+        # Load the model with custom objects if needed
         model = load_model(model_path)
+        st.success("Model loaded successfully!")
         return model
 
     except Exception as e:
-        st.error(f"Error loading model: {e}")
+        st.error(f"Error loading model: {str(e)}")
+        st.error("Please check:")
+        st.error("1. Your Hugging Face token has access to the repository")
+        st.error("2. The repository and filename are correct")
+        st.error("3. Your internet connection is working")
         import traceback
-        st.error(f"Detailed error: {traceback.format_exc()}")
+        st.code(traceback.format_exc())
         return None
 
 # Usage
