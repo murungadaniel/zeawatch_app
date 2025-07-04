@@ -353,38 +353,61 @@ if 'scan_history' not in st.session_state:
 @st.cache_resource
 def load_cnn_model():
     try:
-        # Try to download as public model (no token)
-        model_path = hf_hub_download(
-            repo_id="simuyu/zeawatch_model",
-            filename="disease_classifier.h5",
-            token=None  # Attempt as public model
-        )
+        # First try with authentication if token exists
+        if "huggingface" in st.secrets and "token" in st.secrets["huggingface"]:
+            login(token=st.secrets["huggingface"]["token"])
+            model_path = hf_hub_download(
+                repo_id="simuyu/zeawatch_model",
+                filename="disease_classifier.h5",
+                token=st.secrets["huggingface"]["token"]  # Use HF token
+            )
+        else:
+            # Fallback to public access attempt
+            model_path = hf_hub_download(
+                repo_id="simuyu/zeawatch_model",
+                filename="disease_classifier.h5",
+                token=None
+            )
+            
         model = load_model(model_path)
         st.success("Model loaded successfully!")
         return model
         
     except Exception as e:
         st.error(f"Failed to load model: {str(e)}")
-        st.error("This appears to be a private Hugging Face model")
-        st.error("You need either:")
-        st.error("1. A Hugging Face access token from the model owner")
-        st.error("2. The model file (disease_classifier.h5) placed locally")
+        st.error("Troubleshooting steps:")
+        st.error("1. Verify your Hugging Face token has access to this repository")
+        st.error("2. Check if the model exists at: huggingface.co/simuyu/zeawatch_model")
+        st.error("3. As a fallback, place disease_classifier.h5 in your app directory")
         return None
 
+# Token verification
 try:
+    # Zenmatch token check (keep your existing functionality)
     MF_TOKEN = st.secrets.get("zenmatch", {}).get("token")
     if not MF_TOKEN:
         st.error("Missing Zenmatch token!")
         st.stop()
         
+    # New: Verify Hugging Face token is configured (but don't fail if missing)
+    if "huggingface" not in st.secrets:
+        st.warning("Hugging Face token not configured - will attempt public download")
+        
 except Exception as e:
-    st.error(f"Failed to load token: {e}")
+    st.error(f"Failed to load tokens: {e}")
     st.stop()
 
 # Load model
 model = load_cnn_model()
 if model is None:
-    st.stop()
+    # Final fallback to local model if available
+    try:
+        model = load_model('disease_classifier.h5')
+        st.success("Loaded local model successfully!")
+    except:
+        st.error("Could not load any model. Please check the error messages above.")
+        st.stop()
+
 
 # Class labels
 class_labels = ['Healthy', 'Gray Spot Leaf', 'Blight', 'Common Rust']
