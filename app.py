@@ -11,6 +11,7 @@ from streamlit_option_menu import option_menu
 import io
 from PIL import Image
 import cv2
+from huggingface_hub import hf_hub_download, login
 
 # Import basic libraries for email functionality
 from datetime import datetime
@@ -289,24 +290,50 @@ if 'scan_history' not in st.session_state:
 
 # Load the model
 @st.cache_resource
+# def load_cnn_model():
+#     try:
+#         # First try to load the model
+#         model = load_model('disease_classifier.h5')
+#         return model
+#     except Exception as e:
+#         # If loading fails, provide detailed error
+#         st.error(f"Error loading model: {e}")
+#         import traceback
+#         st.error(f"Detailed error: {traceback.format_exc()}")
+        
+#         # Try to check if the model file exists
+#         if not os.path.exists('disease_classifier.h5'):
+#             st.error("Model file 'disease_classifier.h5' not found. Please make sure it's in the correct directory.")
+        
+#         # Return None to indicate failure
+#         return None
+
+# model = load_cnn_model()
+
+# Authenticate with Hugging Face using API Key (safer via environment variable)
+HF_TOKEN = os.getenv("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")  # Set this in GitHub Actions or local .env
+login(token=HF_TOKEN)
+
 def load_cnn_model():
     try:
-        # First try to load the model
-        model = load_model('disease_classifier.h5')
+        # Download the model from Hugging Face Hub
+        model_path = hf_hub_download(
+            repo_id="simuyu/zeawatch_model",  # Replace with your Hugging Face repo
+            filename="disease_classifier.h5",        # Your model filename
+            token=HF_TOKEN
+        )
+
+        # Load the model
+        model = load_model(model_path)
         return model
+
     except Exception as e:
-        # If loading fails, provide detailed error
         st.error(f"Error loading model: {e}")
         import traceback
         st.error(f"Detailed error: {traceback.format_exc()}")
-        
-        # Try to check if the model file exists
-        if not os.path.exists('disease_classifier.h5'):
-            st.error("Model file 'disease_classifier.h5' not found. Please make sure it's in the correct directory.")
-        
-        # Return None to indicate failure
         return None
 
+# Usage
 model = load_cnn_model()
 
 # Class labels
