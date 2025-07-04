@@ -385,25 +385,7 @@ def load_cnn_model():
         return model
         
     except Exception as e:
-        st.error(f"Model loading error: {str(e)}")
-        st.markdown("""
-        ### Required Fixes:
-        1. **Ensure TensorFlow 2.12.0** is installed exactly
-        2. **Try loading with these settings**:
-        ```python
-        model = tf.keras.models.load_model(
-            'model.h5', 
-            compile=False,
-            custom_objects={
-                'InputLayer': tf.keras.layers.InputLayer(
-                    input_shape=(224, 224, 3)
-                )
-            }
-        )
-        model.compile(optimizer='adam', loss='categorical_crossentropy')
-        ```
-        3. **Contact the model author** for exact architecture details
-        """)
+        st.error(f"Model loading failed: {str(e)}")
         return None
 
 # Token verification
