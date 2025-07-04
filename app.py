@@ -371,9 +371,11 @@ def load_cnn_model():
         # Custom model loading with compatibility fix
         custom_objects = {
             'InputLayer': tf.keras.layers.InputLayer(
-                input_shape=(224, 224, 3),  # Explicit shape without batch_dim
+                input_shape=(224, 224, 3)  # Explicit shape without batch_dim
+            ),
             'input_layer': tf.keras.layers.InputLayer(
-                input_shape=(224, 224, 3))  # Handle different naming
+                input_shape=(224, 224, 3)  # Handle different naming
+            )
         }
         
         model = tf.keras.models.load_model(
