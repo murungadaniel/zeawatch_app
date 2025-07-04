@@ -313,7 +313,7 @@ if 'scan_history' not in st.session_state:
 # Authenticate with Hugging Face using API Key (safer via environment variable)
 # HF_TOKEN = os.getenv("HF_TOKEN")   # Set this in GitHub Actions or local .env
 
-zeawatch_secrets = st.secrets.get("zeawatch", {})
+MF_TOKEN = st.secrets.get("zenmatch", {}).get("token")
 HF_TOKEN = zeawatch_secrets.get("token")
 
 
