@@ -323,32 +323,54 @@ if 'scan_history' not in st.session_state:
 #     st.error(f"Failed to load token: {e}")
 #     st.stop()
 
+# @st.cache_resource
+# def load_cnn_model():
+#     try:
+#         # Download the model from Hugging Face Hub
+#         # Removed HF_TOKEN since you mentioned you don't have it
+#         # The model will download if public, otherwise will fail
+#         model_path = hf_hub_download(
+#             repo_id="simuyu/zeawatch_model",
+#             filename="disease_classifier.h5",
+#             token=st.secrets["zenmatch"]["token"]  # Pass token here
+#         )
+        
+#         # Load the model
+#         model = load_model(model_path)
+#         st.success("Model loaded successfully!")
+#         return model
+
+#     except Exception as e:
+#         st.error(f"Error loading model: {str(e)}")
+#         st.error("Please check:")
+#         st.error("1. The repository 'simuyu/zeawatch_model' exists and is public")
+#         st.error("2. The filename 'disease_classifier.h5' is correct")
+#         st.error("3. Your internet connection is working")
+#         import traceback
+#         st.code(traceback.format_exc())
+#         return None
+
 @st.cache_resource
 def load_cnn_model():
     try:
-        # Download the model from Hugging Face Hub
-        # Removed HF_TOKEN since you mentioned you don't have it
-        # The model will download if public, otherwise will fail
+        # Try to download as public model (no token)
         model_path = hf_hub_download(
             repo_id="simuyu/zeawatch_model",
             filename="disease_classifier.h5",
-            token=st.secrets["zenmatch"]["token"]  # Pass token here
+            token=None  # Attempt as public model
         )
-        
-        # Load the model
         model = load_model(model_path)
         st.success("Model loaded successfully!")
         return model
-
+        
     except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        st.error("Please check:")
-        st.error("1. The repository 'simuyu/zeawatch_model' exists and is public")
-        st.error("2. The filename 'disease_classifier.h5' is correct")
-        st.error("3. Your internet connection is working")
-        import traceback
-        st.code(traceback.format_exc())
+        st.error(f"Failed to load model: {str(e)}")
+        st.error("This appears to be a private Hugging Face model")
+        st.error("You need either:")
+        st.error("1. A Hugging Face access token from the model owner")
+        st.error("2. The model file (disease_classifier.h5) placed locally")
         return None
+
 try:
     MF_TOKEN = st.secrets.get("zenmatch", {}).get("token")
     if not MF_TOKEN:
