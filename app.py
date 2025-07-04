@@ -362,25 +362,26 @@ def load_cnn_model():
                 token=st.secrets["huggingface"]["token"]
             )
         else:
-            # Fallback to public access attempt
             model_path = hf_hub_download(
                 repo_id="simuyu/zeawatch_model",
                 filename="disease_classifier.h5",
                 token=None
             )
+
+        # Custom model loading with compatibility fix
+        custom_objects = {
+            'InputLayer': tf.keras.layers.InputLayer(
+                input_shape=(224, 224, 3),  # Explicit shape without batch_dim
+            'input_layer': tf.keras.layers.InputLayer(
+                input_shape=(224, 224, 3))  # Handle different naming
+        }
         
-        # Load with compatibility settings
         model = tf.keras.models.load_model(
             model_path,
             compile=False,
-            custom_objects={
-                'InputLayer': tf.keras.layers.InputLayer(
-                    input_shape=(224, 224, 3)  # Explicit shape without batch_dim
-                )
-            }
+            custom_objects=custom_objects
         )
         model.compile(optimizer='adam', loss='categorical_crossentropy')
-        st.success("Model loaded successfully!")
         return model
         
     except Exception as e:
