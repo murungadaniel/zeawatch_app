@@ -359,7 +359,7 @@ def load_cnn_model():
             model_path = hf_hub_download(
                 repo_id="simuyu/zeawatch_model",
                 filename="disease_classifier.h5",
-                token=st.secrets["huggingface"]["token"]  # Use HF token
+                token=st.secrets["huggingface"]["token"]
             )
         else:
             # Fallback to public access attempt
@@ -368,17 +368,41 @@ def load_cnn_model():
                 filename="disease_classifier.h5",
                 token=None
             )
-            
-        model = load_model(model_path)
+        
+        # Load with compatibility settings
+        model = tf.keras.models.load_model(
+            model_path,
+            compile=False,
+            custom_objects={
+                'InputLayer': tf.keras.layers.InputLayer(
+                    input_shape=(224, 224, 3)  # Explicit shape without batch_dim
+                )
+            }
+        )
+        model.compile(optimizer='adam', loss='categorical_crossentropy')
         st.success("Model loaded successfully!")
         return model
         
     except Exception as e:
-        st.error(f"Failed to load model: {str(e)}")
-        st.error("Troubleshooting steps:")
-        st.error("1. Verify your Hugging Face token has access to this repository")
-        st.error("2. Check if the model exists at: huggingface.co/simuyu/zeawatch_model")
-        st.error("3. As a fallback, place disease_classifier.h5 in your app directory")
+        st.error(f"Model loading error: {str(e)}")
+        st.markdown("""
+        ### Required Fixes:
+        1. **Ensure TensorFlow 2.12.0** is installed exactly
+        2. **Try loading with these settings**:
+        ```python
+        model = tf.keras.models.load_model(
+            'model.h5', 
+            compile=False,
+            custom_objects={
+                'InputLayer': tf.keras.layers.InputLayer(
+                    input_shape=(224, 224, 3)
+                )
+            }
+        )
+        model.compile(optimizer='adam', loss='categorical_crossentropy')
+        ```
+        3. **Contact the model author** for exact architecture details
+        """)
         return None
 
 # Token verification
