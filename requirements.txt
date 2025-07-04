@@ -6,3 +6,4 @@ Pillow>=10.3.0
 streamlit-option-menu==0.3.2
 huggingface_hub==0.22.2
 tensorflow==2.15.0
+opencv-python==4.9.0.80
