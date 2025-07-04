@@ -312,7 +312,12 @@ if 'scan_history' not in st.session_state:
 
 # Authenticate with Hugging Face using API Key (safer via environment variable)
 # HF_TOKEN = os.getenv("HF_TOKEN")   # Set this in GitHub Actions or local .env
-HF_TOKEN = st.secrets["zeawatch"]["HF_TOKEN"]
+
+HF_TOKEN = st.secrets["zeawatch"]["token"]
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = HF_TOKEN
+
+
+
 login(token=HF_TOKEN)
 
 def load_cnn_model():
