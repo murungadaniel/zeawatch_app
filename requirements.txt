@@ -4,7 +4,7 @@ numpy==1.26.4
 rich==13.7.1
 Pillow==10.3.0
 streamlit-option-menu==0.3.2
-huggingface_hub==0.22.2
-tensorflow==2.15.0
-protobuf==3.20.3  # Required for TensorFlow 2.15
+huggingface-hub==0.22.2
+tensorflow==2.12.0  # Exact version the model was built with
+protobuf==3.20.3    # Required companion
 opencv-python-headless==4.9.0.80  # Headless version for deployment
