@@ -332,7 +332,7 @@ def load_cnn_model():
         model_path = hf_hub_download(
             repo_id="simuyu/zeawatch_model",
             filename="disease_classifier.h5",
-            token=None  # No token needed for public models
+            token=st.secrets["zenmatch"]["token"]  # Pass token here
         )
         
         # Load the model
