@@ -311,7 +311,7 @@ if 'scan_history' not in st.session_state:
 # model = load_cnn_model()
 
 # Authenticate with Hugging Face using API Key (safer via environment variable)
-HF_TOKEN = os.getenv(HF_TOKEN)  # Set this in GitHub Actions or local .env
+HF_TOKEN = os.getenv("HF_TOKEN")   # Set this in GitHub Actions or local .env
 login(token=HF_TOKEN)
 
 def load_cnn_model():
