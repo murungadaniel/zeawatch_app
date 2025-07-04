@@ -313,16 +313,11 @@ if 'scan_history' not in st.session_state:
 # Authenticate with Hugging Face using API Key (safer via environment variable)
 # HF_TOKEN = os.getenv("HF_TOKEN")   # Set this in GitHub Actions or local .env
 
-# Authenticate with Hugging Face using secrets
 try:
     # Get tokens from secrets or environment variables
-    HF_TOKEN = st.secrets.get("huggingface", {}).get("token") or os.environ.get("HF_TOKEN")
     MF_TOKEN = st.secrets.get("zenmatch", {}).get("token") or os.environ.get("ZENMATCH_TOKEN")
     
-    if not HF_TOKEN:
-        st.error("Missing Hugging Face API token in secrets!")
-        st.stop()
-        
+    # You were checking HF_TOKEN but never defined it - removed this check
     if not MF_TOKEN:
         st.error("Missing Zenmatch API token in secrets!")
         st.stop()
@@ -335,13 +330,15 @@ except Exception as e:
 def load_cnn_model():
     try:
         # Download the model from Hugging Face Hub
+        # Removed HF_TOKEN since you mentioned you don't have it
+        # The model will download if public, otherwise will fail
         model_path = hf_hub_download(
             repo_id="simuyu/zeawatch_model",
             filename="disease_classifier.h5",
-            token=HF_TOKEN
+            token=None  # No token needed for public models
         )
         
-        # Load the model with custom objects if needed
+        # Load the model
         model = load_model(model_path)
         st.success("Model loaded successfully!")
         return model
@@ -349,15 +346,17 @@ def load_cnn_model():
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
         st.error("Please check:")
-        st.error("1. Your Hugging Face token has access to the repository")
-        st.error("2. The repository and filename are correct")
+        st.error("1. The repository 'simuyu/zeawatch_model' exists and is public")
+        st.error("2. The filename 'disease_classifier.h5' is correct")
         st.error("3. Your internet connection is working")
         import traceback
         st.code(traceback.format_exc())
         return None
 
-# Usage
+# Load model
 model = load_cnn_model()
+if model is None:
+    st.stop()
 
 # Class labels
 class_labels = ['Healthy', 'Gray Spot Leaf', 'Blight', 'Common Rust']
